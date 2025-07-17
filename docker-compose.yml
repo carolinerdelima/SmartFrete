@@ -15,7 +15,7 @@ services:
       - smartfrete-net
 
   db:
-    image: postgres:15-alpine
+    image: postgres:15
     container_name: smartfrete-db
     environment:
       POSTGRES_DB: ${DB_DATABASE}
@@ -27,20 +27,6 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - smartfrete-net
-
-  db:
-    image: postgres:15
-    container_name: kanban-db
-    environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "${DB_PORT:-5432}:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - laravel
 
   nginx:
     image: nginx:latest
