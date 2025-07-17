@@ -23,11 +23,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Define diretório de trabalho
 WORKDIR /var/www
 
+# Copia e adiciona permissão ao entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Criação de pastas do Laravel
 RUN mkdir -p storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
-    bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    bootstrap/cache
+
+# Permissões serão corrigidas no entrypoint, pra tratar casos de volumes
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["php-fpm"]
