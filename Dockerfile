@@ -1,6 +1,6 @@
 FROM php:8.2-fpm-alpine3.18
 
-# Instala dependências e extensões PHP necessárias para MySQL
+# Instalar dependências e extensões PHP necessárias para PostgreSQL
 RUN apk add --no-cache \
     bash \
     git \
@@ -9,10 +9,11 @@ RUN apk add --no-cache \
     unzip \
     libzip-dev \
     oniguruma-dev \
-    mysql-client \
+    postgresql-client \
+    postgresql-dev \
     && docker-php-ext-install \
         pdo \
-        pdo_mysql \
+        pdo_pgsql \
         mbstring \
         zip \
         bcmath
@@ -34,6 +35,5 @@ RUN mkdir -p storage/framework/cache \
     storage/logs \
     bootstrap/cache
 
-# Permissões serão corrigidas no entrypoint, pra tratar casos de volumes
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["php-fpm"]

@@ -15,19 +15,32 @@ services:
       - smartfrete-net
 
   db:
-    image: mysql:8.0
+    image: postgres:15-alpine
     container_name: smartfrete-db
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "${DB_PORT:-5432}:5432"
     volumes:
-      - mysqldata:/var/lib/mysql
+      - pgdata:/var/lib/postgresql/data
     networks:
       - smartfrete-net
+
+  db:
+    image: postgres:15
+    container_name: kanban-db
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - laravel
 
   nginx:
     image: nginx:latest
@@ -42,22 +55,8 @@ services:
     networks:
       - smartfrete-net
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: smartfrete-phpmyadmin
-    environment:
-      PMA_HOST: db
-      PMA_USER: ${DB_USERNAME}
-      PMA_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "${PHPMYADMIN_PORT:-8080}:80"
-    depends_on:
-      - db
-    networks:
-      - smartfrete-net
-
 volumes:
-  mysqldata:
+  pgdata:
 
 networks:
   smartfrete-net:
