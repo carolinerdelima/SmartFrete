@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartfrete-app
+    working_dir: /var/www/smartfrete
+    volumes:
+      - ./smartfrete:/var/www/smartfrete
+    depends_on:
+      - db
+    networks:
+      - smartfrete-net
+
+  db:
+    image: mysql:8.0
+    container_name: smartfrete-db
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - smartfrete-net
+
+  nginx:
+    image: nginx:latest
+    container_name: smartfrete-nginx
+    ports:
+      - "${NGINX_HOST_PORT:-8000}:80"
+    volumes:
+      - ./smartfrete:/var/www/smartfrete
+      - ./docker/nginx/:/etc/nginx/conf.d/
+    depends_on:
+      - app
+    networks:
+      - smartfrete-net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: smartfrete-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${PHPMYADMIN_PORT:-8080}:80"
+    depends_on:
+      - db
+    networks:
+      - smartfrete-net
+
+volumes:
+  mysqldata:
+
+networks:
+  smartfrete-net:
