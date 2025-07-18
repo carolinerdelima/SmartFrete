@@ -11,6 +11,13 @@ services:
       - ./smartfrete:/var/www/smartfrete
     depends_on:
       - db
+    environment:
+      - DB_CONNECTION=${DB_CONNECTION}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
     networks:
       - smartfrete-net
 
@@ -46,3 +53,4 @@ volumes:
 
 networks:
   smartfrete-net:
+    driver: bridge

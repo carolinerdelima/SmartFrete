@@ -1,6 +1,6 @@
 FROM php:8.2-fpm-alpine3.18
 
-# Instalar dependências e extensões PHP necessárias para PostgreSQL
+# Instala dependências e extensões necessárias
 RUN apk add --no-cache \
     bash \
     git \
@@ -18,15 +18,12 @@ RUN apk add --no-cache \
         zip \
         bcmath
 
-# Instala Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
 
-# Define diretório de trabalho
-WORKDIR /var/www
+WORKDIR /var/www/smartfrete
+COPY ./smartfrete /var/www/smartfrete
 
-# Copia e adiciona permissão ao entrypoint
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN composer install --no-dev --optimize-autoloader
 
 # Criação de pastas do Laravel
 RUN mkdir -p storage/framework/cache \
@@ -34,6 +31,13 @@ RUN mkdir -p storage/framework/cache \
     storage/framework/views \
     storage/logs \
     bootstrap/cache
+
+# Corrige permissões dos diretórios necessários
+RUN chown -R www-data:www-data /var/www/smartfrete/storage /var/www/smartfrete/bootstrap/cache
+RUN chmod -R 775 /var/www/smartfrete/storage /var/www/smartfrete/bootstrap/cache
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["php-fpm"]
