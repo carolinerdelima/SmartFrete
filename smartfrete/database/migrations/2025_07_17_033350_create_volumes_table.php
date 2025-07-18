@@ -19,9 +19,9 @@ return new class extends Migration
             $table->decimal('unitary_weight', 10, 2);
             $table->decimal('price', 10, 2);
             $table->string('sku');
-            $table->decimal('height', 10, 3);
-            $table->decimal('width', 10, 3);
-            $table->decimal('length', 10, 3);
+            $table->decimal('height', 10, 2);
+            $table->decimal('width', 10, 2);
+            $table->decimal('length', 10, 2);
             $table->timestamps();
         });
     }
