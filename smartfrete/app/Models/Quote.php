@@ -25,6 +25,8 @@ class Quote extends Model
         'frete_rapido_request'  => 'array',
         'frete_rapido_response' => 'array',
         'response_time_ms'      => 'integer',
+        'uuid'                  => 'string',
+        'status'                => 'string',
     ];
 
     /**

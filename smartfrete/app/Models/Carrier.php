@@ -27,6 +27,8 @@ class Carrier extends Model
         'final_price'     => 'decimal:2',
         'original_price'  => 'decimal:2',
         'deadline_days'   => 'integer',
+        'carrier_code'    => 'string',
+        'service_code'    => 'string',
     ];
 
     /**
