@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'freterapido' => [
+        'token' => env('FR_TOKEN'),
+        'cnpj' => env('FR_CNPJ'),
+        'platform_code' => env('FR_PLATFORM_CODE'),
+    ],
+
 ];
