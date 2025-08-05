@@ -22,7 +22,7 @@ class QuoteRequest extends FormRequest
             'volumes.*.category' => 'required|integer',
             'volumes.*.amount' => 'required|integer|min:1',
             'volumes.*.unitary_weight' => 'required|numeric|min:0.01',
-            'volumes.*.price' => 'required|numeric|min:0',
+            'volumes.*.unitary_price' => 'required|numeric|min:0',
             'volumes.*.sku' => 'required|string|max:255',
             'volumes.*.height' => 'required|numeric|min:0.01',
             'volumes.*.width' => 'required|numeric|min:0.01',
@@ -56,9 +56,9 @@ class QuoteRequest extends FormRequest
             'volumes.*.unitary_weight.numeric'  => 'O peso unitário deve ser um número.',
             'volumes.*.unitary_weight.min'      => 'O peso unitário deve ser maior que zero.',
 
-            'volumes.*.price.required'          => 'O preço é obrigatório.',
-            'volumes.*.price.numeric'           => 'O preço deve ser um número.',
-            'volumes.*.price.min'               => 'O preço não pode ser negativo.',
+            'volumes.*.unitary_price.required'          => 'O preço é obrigatório.',
+            'volumes.*.unitary_price.numeric'           => 'O preço deve ser um número.',
+            'volumes.*.unitary_price.min'               => 'O preço não pode ser negativo.',
 
             'volumes.*.sku.required'            => 'O SKU é obrigatório.',
             'volumes.*.sku.string'              => 'O SKU deve ser uma string.',

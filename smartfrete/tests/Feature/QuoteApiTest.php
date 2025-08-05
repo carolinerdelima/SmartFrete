@@ -18,8 +18,8 @@ class QuoteApiTest extends TestCase
 
         $response->assertStatus(422)
                  ->assertJsonValidationErrors([
-                     'recipient.address.zipcode',
-                     'volumes'
+                        'recipient.address.zipcode',
+                        'volumes'
                  ]);
     }
 
@@ -37,7 +37,7 @@ class QuoteApiTest extends TestCase
                     'category' => '1',
                     'amount' => 1,
                     'unitary_weight' => 1.0,
-                    'price' => 150.00,
+                    'unitary_price' => 150.00,
                     'sku' => 'ABC123',
                     'height' => 0.1,
                     'width' => 0.1,
@@ -49,15 +49,15 @@ class QuoteApiTest extends TestCase
         $response = $this->postJson('/api/quote', $payload);
 
         $response->assertStatus(200)
-                 ->assertJsonStructure([
-                     'carrier' => [
-                         '*' => [
-                             'name',
-                             'service',
-                             'deadline',
-                             'price'
-                         ]
-                     ]
+                    ->assertJsonStructure([
+                        'carrier' => [
+                            '*' => [
+                                'name',
+                                'service',
+                                'deadline',
+                                'price'
+                            ]
+                        ]
                  ]);
 
         // Verifica se uma quote foi salva

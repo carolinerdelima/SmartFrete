@@ -20,7 +20,7 @@ class QuoteRequestValidationTest extends TestCase
                     'category' => '1',
                     'amount' => 1,
                     'unitary_weight' => 1.0,
-                    'price' => 150.00,
+                    'unitary_price' => 150.00,
                     'sku' => 'ABC123',
                     'height' => 0.1,
                     'width' => 0.1,
@@ -65,13 +65,13 @@ class QuoteRequestValidationTest extends TestCase
 
         $response->assertStatus(422)
                  ->assertJsonValidationErrors([
-                     'volumes.0.amount',
-                     'volumes.0.unitary_weight',
-                     'volumes.0.price',
-                     'volumes.0.sku',
-                     'volumes.0.height',
-                     'volumes.0.width',
-                     'volumes.0.length',
+                    'volumes.0.amount',
+                    'volumes.0.unitary_weight',
+                    'volumes.0.unitary_price',
+                    'volumes.0.sku',
+                    'volumes.0.height',
+                    'volumes.0.width',
+                    'volumes.0.length',
                  ]);
     }
 
@@ -88,7 +88,7 @@ class QuoteRequestValidationTest extends TestCase
                     'category' => '1',
                     'amount' => 1,
                     'unitary_weight' => 1.0,
-                    'price' => 150.00,
+                    'unitary_price' => 150.00,
                     'sku' => 'ABC123',
                     'height' => 0.1,
                     'width' => 0.1,

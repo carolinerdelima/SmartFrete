@@ -2,67 +2,55 @@
 
 namespace App\Services;
 
-use App\Models\Quote;
-use App\Models\Volume;
-use App\Models\Carrier;
 use App\Http\Clients\FreteRapidoHttpClient;
-use Illuminate\Support\Facades\DB;
+use App\Repositories\QuoteRepository;
+use Illuminate\Support\Str;
 
 class QuoteService
 {
-    public function __construct(protected FreteRapidoHttpClient $freteRapidoClient)
+    public function __construct(
+        protected FreteRapidoHttpClient $client,
+        protected QuoteRepository $repository
+    ) {}
+
+    public function createQuote(array $data)
     {
-    }
+        $uuid = Str::uuid()->toString();
 
-    public function createQuote(array $data): Quote
-    {
-        return DB::transaction(function () use ($data) {
-            $zipcode = $data['recipient']['address']['zipcode'];
-            $volumes = $data['volumes'];
-            $simulationType = $data['simulation_type'] ?? [0];
+        $freteRapidoResponse = $this->client->quote(
+            $data['volumes'],
+            $data['recipient']['address']['zipcode'],
+            $data['simulation_type']
+        );
 
-            // Prepara volumes no formato da API
-            $volumesApi = collect($volumes)->map(fn ($v) => [
-                'category'       => $v['category'],
-                'amount'         => $v['amount'],
-                'unitary_weight' => $v['unitary_weight'],
-                'unitary_price'  => $v['price'],
-                'sku'            => $v['sku'],
-                'height'         => $v['height'],
-                'width'          => $v['width'],
-                'length'         => $v['length'],
-            ])->toArray();
+        $quoteData = [
+            'uuid'                  => $uuid,
+            'recipient_zipcode'     => $data['recipient']['address']['zipcode'],
+            'frete_rapido_request'  => json_encode($data),
+            'frete_rapido_response' => json_encode($freteRapidoResponse),
+            'response_time_ms'      => 0,
+        ];
 
-            $start = microtime(true);
-            $response = $this->freteRapidoClient->quote($volumesApi, $zipcode, $simulationType);
-            $duration = intval((microtime(true) - $start) * 1000);
-
-            $quote = Quote::create([
-                'recipient_zipcode'     => $zipcode,
-                'frete_rapido_request'  => $data,
-                'frete_rapido_response' => $response,
-                'response_time_ms'      => $duration,
-                'status'                => 'success',
+        $volumesData = collect($data['volumes'])->map(function ($volume) {
+            return array_merge($volume, [
+                'price' => $volume['unitary_price'] ?? 0,
             ]);
+        })->toArray();
 
-            foreach ($volumes as $v) {
-                $quote->volumes()->create($v);
-            }
+        $carriersData = collect(data_get($freteRapidoResponse, 'dispatchers.0.offers', []))
+            ->map(function ($item) {
+                return [
+                    'name'           => data_get($item, 'carrier.name'),
+                    'service'        => data_get($item, 'service'),
+                    'deadline_days'  => data_get($item, 'delivery_time.days'),
+                    'final_price'    => data_get($item, 'final_price'),
+                    'original_price' => data_get($item, 'cost_price'),
+                    'carrier_code'   => data_get($item, 'carrier.reference'),
+                    'service_code'   => data_get($item, 'service_code'),
+                ];
+            })->toArray();
 
-            $offers = data_get($response, 'dispatchers.0.offers', []);
-            foreach ($offers as $oferta) {
-                $quote->carriers()->create([
-                    'name'           => data_get($oferta, 'carrier.name'),
-                    'service'        => data_get($oferta, 'service'),
-                    'deadline_days'  => data_get($oferta, 'delivery_time.days'),
-                    'final_price'    => data_get($oferta, 'final_price'),
-                    'original_price' => data_get($oferta, 'cost_price'),
-                    'carrier_code'   => data_get($oferta, 'carrier.reference'),
-                    'service_code'   => data_get($oferta, 'service_code'),
-                ]);
-            }
-
-            return $quote;
-        });
+        return $this->repository->store($quoteData, $volumesData, $carriersData);
     }
+
 }
