@@ -4,6 +4,9 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\Quote;
+use App\Models\Volume;
+use App\Models\Carrier;
 
 class QuoteApiTest extends TestCase
 {
@@ -20,7 +23,7 @@ class QuoteApiTest extends TestCase
                  ]);
     }
 
-    public function test_deve_retornar_200_e_retornar_carriers_quando_dados_estao_corretos(): void
+    public function test_deve_retornar_200_e_persistir_dados_quando_requisicao_valida(): void
     {
         $payload = [
             'recipient' => [
@@ -57,9 +60,18 @@ class QuoteApiTest extends TestCase
                      ]
                  ]);
 
-        // Verifica persistência no banco
-        $this->assertDatabaseCount('quotes', 1);
-        $this->assertDatabaseCount('volumes', 1);
-        $this->assertDatabaseCount('carriers', 3); // se a API retornar 3 opções por exemplo
+        // Verifica se uma quote foi salva
+        $this->assertEquals(1, Quote::count());
+
+        // Verifica se o volume foi salvo e associado
+        $this->assertEquals(1, Volume::count());
+        $volume = Volume::first();
+        $this->assertEquals('ABC123', $volume->sku);
+
+        // Verifica se ao menos 1 carrier foi salvo para essa quote
+        $this->assertGreaterThanOrEqual(1, Carrier::count());
+        $this->assertDatabaseHas('carriers', [
+            'quote_id' => Quote::first()->id
+        ]);
     }
 }
