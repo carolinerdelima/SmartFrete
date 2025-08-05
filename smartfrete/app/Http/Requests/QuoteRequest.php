@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+
 
 class QuoteRequest extends FormRequest
 {
@@ -24,6 +27,8 @@ class QuoteRequest extends FormRequest
             'volumes.*.height' => 'required|numeric|min:0.01',
             'volumes.*.width' => 'required|numeric|min:0.01',
             'volumes.*.length' => 'required|numeric|min:0.01',
+            'simulation_type' => 'required|array|min:1',
+            'simulation_type.*' => 'in:0,1',
         ];
     }
 
@@ -70,6 +75,21 @@ class QuoteRequest extends FormRequest
             'volumes.*.length.required'         => 'O comprimento é obrigatório.',
             'volumes.*.length.numeric'          => 'O comprimento deve ser um número.',
             'volumes.*.length.min'              => 'O comprimento deve ser maior que zero.',
+
+            'simulation_type.required' => 'O tipo de simulação é obrigatório.',
+            'simulation_type.array' => 'O tipo de simulação deve ser um array.',
+            'simulation_type.*.in' => 'O tipo de simulação deve ser 0 (Fracionada) ou 1 (Lotação).',
         ];
+    }
+
+    /**
+     * Personaliza a resposta de erro de validação.
+     */
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(response()->json([
+            'message' => 'Erro de validação.',
+            'errors' => $validator->errors(),
+        ], 422));
     }
 }

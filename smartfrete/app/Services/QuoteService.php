@@ -19,6 +19,7 @@ class QuoteService
         return DB::transaction(function () use ($data) {
             $zipcode = $data['recipient']['address']['zipcode'];
             $volumes = $data['volumes'];
+            $simulationType = $data['simulation_type'] ?? [0];
 
             // Prepara volumes no formato da API
             $volumesApi = collect($volumes)->map(fn ($v) => [
@@ -33,7 +34,7 @@ class QuoteService
             ])->toArray();
 
             $start = microtime(true);
-            $response = $this->freteRapidoClient->quote($volumesApi, $zipcode);
+            $response = $this->freteRapidoClient->quote($volumesApi, $zipcode, $simulationType);
             $duration = intval((microtime(true) - $start) * 1000);
 
             $quote = Quote::create([
