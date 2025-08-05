@@ -39,7 +39,7 @@ services:
     image: nginx:latest
     container_name: smartfrete-nginx
     ports:
-      - "${NGINX_HOST_PORT:-8000}:80"
+      - "80:80"
     volumes:
       - ./smartfrete:/var/www/smartfrete
       - ./docker/nginx/:/etc/nginx/conf.d/
