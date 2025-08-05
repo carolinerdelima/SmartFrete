@@ -34,7 +34,9 @@ class FreteRapidoHttpClient
         $payload = $this->buildPayload($volumes, $zipcode, $simulationType);
 
         try {
-            $response = Http::post("{$this->baseUrl}/quote/simulate", $payload);
+            $response = Http::timeout(10)              // tempo máximo de 10 segundos
+                            ->retry(3, 200)            // 3 tentativas, com 200ms entre elas
+                            ->post("{$this->baseUrl}/quote/simulate", $payload);
 
             if ($response->failed()) {
                 // Loga erro com o body pra debugar
@@ -43,7 +45,6 @@ class FreteRapidoHttpClient
                     'body' => $response->body(),
                 ]);
 
-                // Lança exceção com contexto completo
                 throw new \RuntimeException(
                     "Erro ao consultar Frete Rápido: HTTP {$response->status()}:\n" . $response->body(),
                     $response->status()
@@ -51,8 +52,8 @@ class FreteRapidoHttpClient
             }
 
             return $response->json();
+
         } catch (\Throwable $e) {
-            // Erro genérico
             throw new \RuntimeException("Erro ao consultar Frete Rápido: " . $e->getMessage(), 500);
         }
     }
