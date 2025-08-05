@@ -12,10 +12,112 @@
         }
     ],
     "paths": {
+        "/api/metrics": {
+            "get": {
+                "tags": [
+                    "Métricas"
+                ],
+                "summary": "Retorna métricas agregadas de cotações",
+                "description": "Retorna as métricas por transportadora, o frete mais barato e o mais caro.",
+                "operationId": "getMetrics",
+                "parameters": [
+                    {
+                        "name": "last_quotes",
+                        "in": "query",
+                        "description": "Número de últimas cotações a considerar (ex: 10). Se omitido, considera todas.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Métricas retornadas com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "by_carrier": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "carrier": {
+                                                        "type": "string",
+                                                        "example": "JT"
+                                                    },
+                                                    "quotes_count": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "total_freight": {
+                                                        "type": "string",
+                                                        "example": "2007.56"
+                                                    },
+                                                    "average_freight": {
+                                                        "type": "string",
+                                                        "example": "669.19"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "cheapest_freight": {
+                                            "properties": {
+                                                "carrier": {
+                                                    "type": "string",
+                                                    "example": "AZUL CARGO"
+                                                },
+                                                "service": {
+                                                    "type": "string",
+                                                    "example": "Convencional"
+                                                },
+                                                "freight_price": {
+                                                    "type": "string",
+                                                    "example": "13.87"
+                                                },
+                                                "delivery_days": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "most_expensive_freight": {
+                                            "properties": {
+                                                "carrier": {
+                                                    "type": "string",
+                                                    "example": "RAPIDÃO FR (TESTE)"
+                                                },
+                                                "service": {
+                                                    "type": "string",
+                                                    "example": "teste2"
+                                                },
+                                                "freight_price": {
+                                                    "type": "string",
+                                                    "example": "4596.55"
+                                                },
+                                                "delivery_days": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/quote": {
             "post": {
                 "tags": [
-                    "Frete"
+                    "Cotação"
                 ],
                 "summary": "Simular cotação de frete",
                 "operationId": "ee2c7ef7e6690a499709be0e0cd8536a",
@@ -148,8 +250,12 @@
     },
     "tags": [
         {
-            "name": "Frete",
-            "description": "Frete"
+            "name": "Métricas",
+            "description": "Métricas"
+        },
+        {
+            "name": "Cotação",
+            "description": "Cotação"
         }
     ]
 }

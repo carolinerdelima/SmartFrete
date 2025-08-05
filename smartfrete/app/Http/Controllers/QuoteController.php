@@ -12,43 +12,57 @@ class QuoteController extends Controller
     /**
      * @OA\Post(
      *     path="/api/quote",
-     *     summary="Simular cotação de frete",
-     *     tags={"Frete"},
+     *     summary="Solicita simulação de frete",
+     *     description="Retorna cotações de frete baseadas nos dados enviados",
+     *     operationId="createQuote",
+     *     tags={"Cotações"},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"recipient", "simulation_type", "volumes"},
-     *             @OA\Property(property="recipient", type="object",
-     *                 @OA\Property(property="address", type="object",
-     *                     @OA\Property(property="zipcode", type="string", example="29161376")
+     *             required={"recipient", "dispatchers", "simulation_type"},
+     *             @OA\Property(
+     *                 property="recipient",
+     *                 type="object",
+     *                 required={"zipcode"},
+     *                 @OA\Property(property="zipcode", type="string", example="90200000")
+     *             ),
+     *             @OA\Property(
+     *                 property="dispatchers",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(
+     *                         property="volumes",
+     *                         type="array",
+     *                         @OA\Items(
+     *                             type="object",
+     *                             required={"category", "amount", "sku", "height", "width", "length", "unitary_price", "unitary_weight"},
+     *                             @OA\Property(property="category", type="string", example="1"),
+     *                             @OA\Property(property="amount", type="integer", example=2),
+     *                             @OA\Property(property="sku", type="string", example="AB123"),
+     *                             @OA\Property(property="description", type="string", example="Caixa de livros"),
+     *                             @OA\Property(property="height", type="number", format="float", example=0.2),
+     *                             @OA\Property(property="width", type="number", format="float", example=0.3),
+     *                             @OA\Property(property="length", type="number", format="float", example=0.4),
+     *                             @OA\Property(property="unitary_price", type="number", format="float", example=45.50),
+     *                             @OA\Property(property="unitary_weight", type="number", format="float", example=1.2)
+     *                         )
+     *                     )
      *                 )
      *             ),
-     *             @OA\Property(property="simulation_type", type="array", @OA\Items(type="integer"), example={0}),
-     *             @OA\Property(property="volumes", type="array",
-     *                 @OA\Items(type="object",
-     *                     @OA\Property(property="category", type="string", example="8"),
-     *                     @OA\Property(property="amount", type="integer", example=2),
-     *                     @OA\Property(property="unitary_weight", type="number", format="float", example=1.5),
-     *                     @OA\Property(property="unitary_price", type="number", format="float", example=250.0),
-     *                     @OA\Property(property="sku", type="string", example="PROD001"),
-     *                     @OA\Property(property="height", type="number", format="float", example=10.0),
-     *                     @OA\Property(property="width", type="number", format="float", example=15.0),
-     *                     @OA\Property(property="length", type="number", format="float", example=20.0)
-     *                 )
+     *             @OA\Property(
+     *                 property="simulation_type",
+     *                 type="array",
+     *                 @OA\Items(type="integer", example=0)
      *             )
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Sucesso",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="carrier", type="array", @OA\Items(
-     *                 @OA\Property(property="name", type="string", example="Transportadora X"),
-     *                 @OA\Property(property="service", type="string", example="Expresso"),
-     *                 @OA\Property(property="deadline", type="integer", example=3),
-     *                 @OA\Property(property="price", type="number", format="float", example=23.5)
-     *             ))
-     *         )
+     *         description="Cotações retornadas com sucesso"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
      *     )
      * )
      */
