@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\MetricsRequest;
-use App\Services\MetricsService;
 use Illuminate\Http\JsonResponse;
+
+use App\Services\MetricsService;
+use App\Http\Requests\MetricsRequest;
 
 class MetricsController extends Controller
 {

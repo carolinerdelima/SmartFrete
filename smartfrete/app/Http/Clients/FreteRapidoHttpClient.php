@@ -15,9 +15,22 @@ class FreteRapidoHttpClient
     public function __construct()
     {
         $this->baseUrl      = config('services.freterapido.base_url');
-        $this->token         = config('services.freterapido.token');
-        $this->cnpj          = config('services.freterapido.cnpj');
-        $this->platformCode  = config('services.freterapido.platform_code');
+        $this->token        = config('services.freterapido.token');
+        $this->cnpj         = config('services.freterapido.cnpj');
+        $this->platformCode = config('services.freterapido.platform_code');
+
+        $credenciais = [
+            'token'         => $this->token,
+            'cnpj'          => $this->cnpj,
+            'platform_code' => $this->platformCode,
+            'base_url' => $this->baseUrl,
+        ];
+
+        foreach ($credenciais as $chave => $valor) {
+            if (empty($valor)) {
+                throw new \InvalidArgumentException("Credencial ausente: '{$chave}' não foi configurado corretamente nas variáveis de ambiente.");
+            }
+        }
     }
 
     /**
