@@ -30,10 +30,5 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
-
-        <!-- variáveis da Frete Rápido -->
-        <env name="FR_TOKEN" value="1d52a9b6b78cf07b08586152459a5c90"/>
-        <env name="FR_CNPJ" value="25438296000158"/>
-        <env name="FR_PLATFORM_CODE" value="5AKVkHqCn"/>
     </php>
 </phpunit>

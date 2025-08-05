@@ -36,9 +36,11 @@ return [
     ],
 
     'freterapido' => [
-        'token' => env('FR_TOKEN'),
-        'cnpj' => env('FR_CNPJ'),
-        'platform_code' => env('FR_PLATFORM_CODE'),
+        'token'         => env('FRETERAPIDO_TOKEN'),
+        'cnpj'          => env('FRETERAPIDO_CNPJ'),
+        'platform_code' => env('FRETERAPIDO_PLATFORM_CODE'),
+        'base_url'      => env('FRETERAPIDO_BASE_URL', 'https://sp.freterapido.com/api/v3'),
     ],
+
 
 ];

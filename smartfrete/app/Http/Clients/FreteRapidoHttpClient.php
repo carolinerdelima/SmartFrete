@@ -2,20 +2,19 @@
 
 namespace App\Http\Clients;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class FreteRapidoHttpClient
 {
-    protected string $baseUrl = 'https://sp.freterapido.com/api/v3';
-
-    protected string $token;
     protected string $cnpj;
+    protected string $token;
+    protected string $baseUrl;
     protected string $platformCode;
 
     public function __construct()
     {
+        $this->baseUrl      = config('services.freterapido.base_url');
         $this->token         = config('services.freterapido.token');
         $this->cnpj          = config('services.freterapido.cnpj');
         $this->platformCode  = config('services.freterapido.platform_code');
