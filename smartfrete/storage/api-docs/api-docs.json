@@ -117,10 +117,11 @@
         "/api/quote": {
             "post": {
                 "tags": [
-                    "Cotação"
+                    "Cotações"
                 ],
-                "summary": "Simular cotação de frete",
-                "operationId": "ee2c7ef7e6690a499709be0e0cd8536a",
+                "summary": "Solicita simulação de frete",
+                "description": "Retorna cotações de frete baseadas nos dados enviados",
+                "operationId": "createQuote",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -128,76 +129,94 @@
                             "schema": {
                                 "required": [
                                     "recipient",
-                                    "simulation_type",
-                                    "volumes"
+                                    "dispatchers",
+                                    "simulation_type"
                                 ],
                                 "properties": {
                                     "recipient": {
+                                        "required": [
+                                            "zipcode"
+                                        ],
                                         "properties": {
-                                            "address": {
-                                                "properties": {
-                                                    "zipcode": {
-                                                        "type": "string",
-                                                        "example": "29161376"
-                                                    }
-                                                },
-                                                "type": "object"
+                                            "zipcode": {
+                                                "type": "string",
+                                                "example": "90200000"
                                             }
                                         },
                                         "type": "object"
                                     },
-                                    "simulation_type": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": [
-                                            0
-                                        ]
-                                    },
-                                    "volumes": {
+                                    "dispatchers": {
                                         "type": "array",
                                         "items": {
                                             "properties": {
-                                                "category": {
-                                                    "type": "string",
-                                                    "example": "8"
-                                                },
-                                                "amount": {
-                                                    "type": "integer",
-                                                    "example": 2
-                                                },
-                                                "unitary_weight": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 1.5
-                                                },
-                                                "unitary_price": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 250
-                                                },
-                                                "sku": {
-                                                    "type": "string",
-                                                    "example": "PROD001"
-                                                },
-                                                "height": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 10
-                                                },
-                                                "width": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 15
-                                                },
-                                                "length": {
-                                                    "type": "number",
-                                                    "format": "float",
-                                                    "example": 20
+                                                "volumes": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "required": [
+                                                            "category",
+                                                            "amount",
+                                                            "sku",
+                                                            "height",
+                                                            "width",
+                                                            "length",
+                                                            "unitary_price",
+                                                            "unitary_weight"
+                                                        ],
+                                                        "properties": {
+                                                            "category": {
+                                                                "type": "string",
+                                                                "example": "1"
+                                                            },
+                                                            "amount": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "sku": {
+                                                                "type": "string",
+                                                                "example": "AB123"
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "Caixa de livros"
+                                                            },
+                                                            "height": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 0.2
+                                                            },
+                                                            "width": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 0.3
+                                                            },
+                                                            "length": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 0.4
+                                                            },
+                                                            "unitary_price": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 45.5
+                                                            },
+                                                            "unitary_weight": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 1.2
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
+                                        }
+                                    },
+                                    "simulation_type": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 0
                                         }
                                     }
                                 },
@@ -208,41 +227,10 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Sucesso",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "carrier": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Transportadora X"
-                                                    },
-                                                    "service": {
-                                                        "type": "string",
-                                                        "example": "Expresso"
-                                                    },
-                                                    "deadline": {
-                                                        "type": "integer",
-                                                        "example": 3
-                                                    },
-                                                    "price": {
-                                                        "type": "number",
-                                                        "format": "float",
-                                                        "example": 23.5
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Cotações retornadas com sucesso"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
                     }
                 }
             }
@@ -254,8 +242,8 @@
             "description": "Métricas"
         },
         {
-            "name": "Cotação",
-            "description": "Cotação"
+            "name": "Cotações",
+            "description": "Cotações"
         }
     ]
 }

@@ -23,8 +23,6 @@ cp .env.example .env
 cp smartfrete/.env.example smartfrete/.env
 ```
 
-> *⚠️ Dica:* Ajuste as variáveis do banco de dados e APP_URL para http://smartfrete.local se desejar usar URL amigável.
-
 ---
 
 ### 3. Adicione no arquivo /etc/hosts (Linux/macOS) 
@@ -102,7 +100,6 @@ php artisan l5-swagger:generate
 
 Ele vai:
 
-  - Ler suas anotações nos controllers,
   - Gerar a documentação Swagger em JSON (storage/api-docs/swagger.json),
   - Deixá-la acessível via navegador em http://smartfrete.local/api/documentation.
 ---
