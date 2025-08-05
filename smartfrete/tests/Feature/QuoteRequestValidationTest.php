@@ -9,7 +9,7 @@ class QuoteRequestValidationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function deve_retornar_erro_quando_zipcode_nao_estiver_presente()
     {
         $payload = [
@@ -35,7 +35,7 @@ class QuoteRequestValidationTest extends TestCase
                  ->assertJsonValidationErrors(['recipient.address.zipcode']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function deve_retornar_erro_quando_volumes_esta_vazio()
     {
         $payload = [
@@ -50,7 +50,7 @@ class QuoteRequestValidationTest extends TestCase
                  ->assertJsonValidationErrors(['volumes']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function deve_retornar_erro_quando_dados_do_volume_estao_incompletos()
     {
         $payload = [
@@ -75,7 +75,7 @@ class QuoteRequestValidationTest extends TestCase
                  ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function deve_passar_quando_dados_estao_validos()
     {
         $payload = [
