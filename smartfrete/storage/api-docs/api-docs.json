@@ -1,0 +1,155 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SmartFrete API",
+        "description": "Documentação da API de simulação de fretes",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://smartfrete.local",
+            "description": "Servidor local"
+        }
+    ],
+    "paths": {
+        "/api/quote": {
+            "post": {
+                "tags": [
+                    "Frete"
+                ],
+                "summary": "Simular cotação de frete",
+                "operationId": "ee2c7ef7e6690a499709be0e0cd8536a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "recipient",
+                                    "simulation_type",
+                                    "volumes"
+                                ],
+                                "properties": {
+                                    "recipient": {
+                                        "properties": {
+                                            "address": {
+                                                "properties": {
+                                                    "zipcode": {
+                                                        "type": "string",
+                                                        "example": "29161376"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "simulation_type": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            0
+                                        ]
+                                    },
+                                    "volumes": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "category": {
+                                                    "type": "string",
+                                                    "example": "8"
+                                                },
+                                                "amount": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "unitary_weight": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1.5
+                                                },
+                                                "unitary_price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 250
+                                                },
+                                                "sku": {
+                                                    "type": "string",
+                                                    "example": "PROD001"
+                                                },
+                                                "height": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 10
+                                                },
+                                                "width": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 15
+                                                },
+                                                "length": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 20
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "carrier": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Transportadora X"
+                                                    },
+                                                    "service": {
+                                                        "type": "string",
+                                                        "example": "Expresso"
+                                                    },
+                                                    "deadline": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 23.5
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Frete",
+            "description": "Frete"
+        }
+    ]
+}
