@@ -4,27 +4,32 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class QuoteRequestValidationTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function deve_retornar_erro_quando_zipcode_nao_estiver_presente()
+    #[Test]
+    public function deve_retornar_erro_quando_zipcode_nao_estiver_presente(): void
     {
         $payload = [
-            'recipient' => ['address' => []],
+            'recipient' => [],
             'simulation_type' => [0],
-            'volumes' => [
+            'dispatchers' => [
                 [
-                    'category' => '1',
-                    'amount' => 1,
-                    'unitary_weight' => 1.0,
-                    'unitary_price' => 150.00,
-                    'sku' => 'ABC123',
-                    'height' => 0.1,
-                    'width' => 0.1,
-                    'length' => 0.1
+                    'volumes' => [
+                        [
+                            'category' => '1',
+                            'amount' => 1,
+                            'unitary_weight' => 1.0,
+                            'unitary_price' => 150.00,
+                            'sku' => 'ABC123',
+                            'height' => 0.1,
+                            'width' => 0.1,
+                            'length' => 0.1
+                        ]
+                    ]
                 ]
             ]
         ];
@@ -32,32 +37,38 @@ class QuoteRequestValidationTest extends TestCase
         $response = $this->postJson('/api/quote', $payload);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['recipient.address.zipcode']);
+                 ->assertJsonValidationErrors(['recipient.zipcode']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function deve_retornar_erro_quando_volumes_esta_vazio()
+    #[Test]
+    public function deve_retornar_erro_quando_volumes_esta_vazio(): void
     {
         $payload = [
-            'recipient' => ['address' => ['zipcode' => '29161376']],
+            'recipient' => ['zipcode' => '29161376'],
             'simulation_type' => [0],
-            'volumes' => []
+            'dispatchers' => [
+                ['volumes' => []]
+            ]
         ];
 
         $response = $this->postJson('/api/quote', $payload);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['volumes']);
+                 ->assertJsonValidationErrors(['dispatchers.0.volumes']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function deve_retornar_erro_quando_dados_do_volume_estao_incompletos()
+    #[Test]
+    public function deve_retornar_erro_quando_dados_do_volume_estao_incompletos(): void
     {
         $payload = [
-            'recipient' => ['address' => ['zipcode' => '29161376']],
+            'recipient' => ['zipcode' => '29161376'],
             'simulation_type' => [0],
-            'volumes' => [
-                ['category' => '1'] // faltando dados obrigatórios
+            'dispatchers' => [
+                [
+                    'volumes' => [
+                        ['category' => '1']
+                    ]
+                ]
             ]
         ];
 
@@ -65,34 +76,36 @@ class QuoteRequestValidationTest extends TestCase
 
         $response->assertStatus(422)
                  ->assertJsonValidationErrors([
-                    'volumes.0.amount',
-                    'volumes.0.unitary_weight',
-                    'volumes.0.unitary_price',
-                    'volumes.0.sku',
-                    'volumes.0.height',
-                    'volumes.0.width',
-                    'volumes.0.length',
+                        'dispatchers.0.volumes.0.amount',
+                        'dispatchers.0.volumes.0.unitary_weight',
+                        'dispatchers.0.volumes.0.unitary_price',
+                        'dispatchers.0.volumes.0.sku',
+                        'dispatchers.0.volumes.0.height',
+                        'dispatchers.0.volumes.0.width',
+                        'dispatchers.0.volumes.0.length',
                  ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function deve_passar_quando_dados_estao_validos()
+    #[Test]
+    public function deve_passar_quando_dados_estao_validos(): void
     {
         $payload = [
-            'recipient' => [
-                'address' => ['zipcode' => '29161376']
-            ],
+            'recipient' => ['zipcode' => '29161376'],
             'simulation_type' => [0],
-            'volumes' => [
+            'dispatchers' => [
                 [
-                    'category' => '1',
-                    'amount' => 1,
-                    'unitary_weight' => 1.0,
-                    'unitary_price' => 150.00,
-                    'sku' => 'ABC123',
-                    'height' => 0.1,
-                    'width' => 0.1,
-                    'length' => 0.1
+                    'volumes' => [
+                        [
+                            'category' => '1',
+                            'amount' => 1,
+                            'unitary_weight' => 1.0,
+                            'unitary_price' => 150.00,
+                            'sku' => 'ABC123',
+                            'height' => 0.1,
+                            'width' => 0.1,
+                            'length' => 0.1
+                        ]
+                    ]
                 ]
             ]
         ];
