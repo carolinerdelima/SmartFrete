@@ -1,91 +1,142 @@
-# SmartFrete API
+# 📦 SmartFrete API
 
-API desenvolvida em Laravel com Docker.
+API desenvolvida com Laravel, PostgreSQL e Docker.  
+Simula e armazena cotações de frete com integração à API Frete Rápido.
+
+---
 
 ## 🚀 Configuração Rápida
 
-1. Clone o projeto:
-```bash
+### 1. Clone o projeto:
+
+bash
 git clone https://github.com/carolinerdelima/SmartFrete.git
 cd SmartFrete
-````
 
-2. Copie o arquivo `.env.example`:
 
-```bash
+### 2. Copie o arquivo .env:
+
+bash
 cp .env.example .env
-```
 
-3. Suba os containers Docker:
 
-```bash
+> *⚠️ Dica:* Ajuste as variáveis do banco de dados e APP_URL para http://smartfrete.local se desejar usar URL amigável.
+
+---
+
+### 3. Adicione no arquivo /etc/hosts (Linux/macOS) ou C:\\Windows\\System32\\drivers\\etc\\hosts (Windows):
+
+txt
+127.0.0.1 smartfrete.local
+
+
+---
+
+### 4. Suba os containers Docker:
+
+bash
 docker compose up -d --build
-```
 
-4. Instale as dependências PHP:
 
-```bash
+---
+
+### 5. Instale as dependências PHP:
+
+bash
 docker compose exec app bash
-```
-
-Dentro do container da aplicação:
-
-```bash
 composer install
-```
 
-5. Gere a chave da aplicação:
 
-Dentro do container da aplicação:
+---
 
-```bash
+### 6. Gere a chave da aplicação:
+
+bash
 php artisan key:generate
-```
 
-6. Ajuste permissões (se necessário):
 
-Dentro do container da aplicação:
+---
 
-```bash
+### 7. Ajuste permissões (se necessário):
+
+bash
 chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
-```
 
-7. Acesse a aplicação:
-
-* [http://localhost](http://localhost)
-
-8. Acesse o PHPMyAdmin:
-
-* [http://localhost:8081](http://localhost:8081)
-
-  * **Usuário:** inserir
-  * **Senha:** inserir
 
 ---
 
-## ⚙️ Comandos Úteis
+## ✅ Acesso
 
-
-* **Migrações:**
-
-```bash
-php artisan migrate
-```
-
-* **Seeders:**
-
-```bash
-php artisan db:seed
-```
+| Recurso                 | URL                                      |
+|-------------------------|-------------------------------------------|
+| Aplicação               | http://smartfrete.local                   |
+| Swagger (Documentação)  | http://smartfrete.local/api/documentation |
+> *Usuário e Senha do banco:* conforme .env (POSTGRES_USER, POSTGRES_PASSWORD)
 
 ---
 
-## 📁 Estrutura
+## 🧪 Testes
 
-TO DO
+bash
+php artisan test
+
+
 ---
 
-## 📌 Observação
+## 📚 Rotas Principais da API
 
-Esse projeto é exclusivamente backend (API), sem front-end incluído.
+### [POST] /api/quote
+
+Simula e retorna uma cotação de frete.  
+Requisição exemplo:
+
+json
+{
+  "recipient": {
+    "zipcode": "90200000"
+  },
+  "dispatchers": [
+    {
+      "volumes": [
+        {
+          "category": "1",
+          "amount": 2,
+          "sku": "AB123",
+          "description": "Caixa de livros",
+          "height": 0.2,
+          "width": 0.3,
+          "length": 0.4,
+          "unitary_price": 45.50,
+          "unitary_weight": 1.2
+        }
+      ]
+    }
+  ],
+  "simulation_type": [0]
+}
+
+
+---
+
+### [GET] /api/metrics
+
+Consulta métricas das cotações salvas.  
+Parâmetro opcional:
+
+- last_quotes: limita a análise às últimas N cotações.
+
+Exemplo:
+
+http
+GET /api/metrics?last_quotes=5
+
+
+---
+
+
+## ✨ Observações
+
+- Este projeto é *exclusivamente backend (API)*.
+- Não inclui front-end.
+- A documentação da API é gerada automaticamente com Swagger.
