@@ -3,18 +3,29 @@
 namespace App\Services;
 
 use App\Http\Clients\FreteRapidoHttpClient;
+use App\Models\Quote;
 use App\Repositories\QuoteRepository;
+use App\Repositories\CarrierRepository;
 use Illuminate\Support\Str;
 
 class QuoteService
 {
     public function __construct(
         protected FreteRapidoHttpClient $client,
-        protected QuoteRepository $repository
+        protected QuoteRepository $quoteRepository,
+        protected CarrierRepository $carrierRepository,
     ) {}
 
-    public function createQuote(array $data)
+    public function createQuote(array $data): Quote
     {
+        $payloadHash = hash('sha256', json_encode($data));
+
+        // Se já existe a cotação, retorna com os carriers carregados
+        $quote = Quote::where('payload_hash', $payloadHash)->with('carriers')->first();
+        if ($quote) {
+            return $quote;
+        }
+
         $uuid = Str::uuid()->toString();
 
         $freteRapidoResponse = $this->client->quote(
@@ -25,6 +36,7 @@ class QuoteService
 
         $quoteData = [
             'uuid'                  => $uuid,
+            'payload_hash'          => $payloadHash,
             'recipient_zipcode'     => $data['recipient']['address']['zipcode'],
             'frete_rapido_request'  => json_encode($data),
             'frete_rapido_response' => json_encode($freteRapidoResponse),
@@ -37,9 +49,14 @@ class QuoteService
             ]);
         })->toArray();
 
+        // Cria a cotação e os volumes
+        $quote = $this->quoteRepository->store($quoteData, $volumesData);
+
+        // Processa os carriers
         $carriersData = collect(data_get($freteRapidoResponse, 'dispatchers.0.offers', []))
-            ->map(function ($item) {
+            ->map(function ($item) use ($quote) {
                 return [
+                    'quote_id'       => $quote->id,
                     'name'           => data_get($item, 'carrier.name'),
                     'service'        => data_get($item, 'service'),
                     'deadline_days'  => data_get($item, 'delivery_time.days'),
@@ -50,7 +67,8 @@ class QuoteService
                 ];
             })->toArray();
 
-        return $this->repository->store($quoteData, $volumesData, $carriersData);
-    }
+        $this->carrierRepository->upsertCarriers($carriersData);
 
+        return $quote->load('carriers');
+    }
 }

@@ -13,12 +13,13 @@ class Quote extends Model
     protected $table = 'quotes';
 
     protected $fillable = [
-        'recipient_zipcode',
         'uuid',
-        'status',
+        'recipient_zipcode',
         'frete_rapido_request',
         'frete_rapido_response',
         'response_time_ms',
+        'status',
+        'payload_hash',
     ];
 
     protected $casts = [
