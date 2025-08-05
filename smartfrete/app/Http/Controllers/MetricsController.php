@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MetricsRequest;
 use App\Services\MetricsService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class MetricsController extends Controller
 {
-    public function index(Request $request, MetricsService $metricsService): JsonResponse
+    public function index(MetricsRequest $request, MetricsService $metricsService): JsonResponse
     {
-        $lastQuotes = $request->query('last_quotes');
+        $lastQuotes = $request->validated('last_quotes');
 
         $metrics = $metricsService->getMetrics($lastQuotes);
 

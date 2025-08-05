@@ -2,30 +2,20 @@
 
 namespace App\Services;
 
-use App\Models\Quote;
+use App\Repositories\MetricsRepository;
 
 class MetricsService
 {
-    public function getMetrics(?int $lastQuotes): array
+    public function __construct(
+        protected MetricsRepository $repository
+    ) {}
+
+    public function getMetrics(?int $lastQuotes = null): array
     {
-        $query = Quote::with('carriers')->latest('id');
-
-        if ($lastQuotes) {
-            $query->limit($lastQuotes);
-        }
-
-        $quotes = $query->get();
-
-        $carriers = $quotes->flatMap->carriers;
-
         return [
-            'carriers' => $carriers->groupBy('name')->map(fn($group) => [
-                'quantidade' => $group->count(),
-                'soma_preco_frete' => $group->sum('final_price'),
-                'media_preco_frete' => round($group->avg('final_price'), 2),
-            ]),
-            'frete_mais_barato' => $carriers->min('final_price'),
-            'frete_mais_caro' => $carriers->max('final_price'),
+            'by_carrier'     => $this->repository->aggregateByCarrier($lastQuotes),
+            'cheapest_freight' => $this->repository->getCheapestFreight($lastQuotes),
+            'most_expensive_freight' => $this->repository->getMostExpensiveFreight($lastQuotes),
         ];
     }
 }

@@ -20,7 +20,7 @@ class QuoteService
     {
         $payloadHash = self::calculatePayloadHash($data);
 
-        // Se já existe a cotação, retorna com os carriers carregados
+        // Verifica se já existe cotação com mesmo payload
         $quote = Quote::where('payload_hash', $payloadHash)->with('carriers')->first();
         if ($quote) {
             return $quote;
@@ -28,31 +28,37 @@ class QuoteService
 
         $uuid = Str::uuid()->toString();
 
+        // Extrai volumes e cep do primeiro dispatcher
+        $firstDispatcher = $data['dispatchers'][0] ?? null;
+        $volumes = $firstDispatcher['volumes'] ?? [];
+        $originZipcode = $firstDispatcher['zipcode'] ?? null;
+        $recipientZipcode = $data['recipient']['zipcode'];
+
         $freteRapidoResponse = $this->client->quote(
-            $data['volumes'],
-            $data['recipient']['address']['zipcode'],
+            $volumes,
+            $recipientZipcode,
             $data['simulation_type']
         );
 
         $quoteData = [
             'uuid'                  => $uuid,
             'payload_hash'          => $payloadHash,
-            'recipient_zipcode'     => $data['recipient']['address']['zipcode'],
+            'recipient_zipcode'     => $recipientZipcode,
             'frete_rapido_request'  => json_encode($data),
             'frete_rapido_response' => json_encode($freteRapidoResponse),
             'response_time_ms'      => 0,
         ];
 
-        $volumesData = collect($data['volumes'])->map(function ($volume) {
+        $volumesData = collect($volumes)->map(function ($volume) {
             return array_merge($volume, [
                 'price' => $volume['unitary_price'] ?? 0,
             ]);
         })->toArray();
 
-        // Cria a cotação e os volumes
+        // Cria cotação e salva volumes
         $quote = $this->quoteRepository->store($quoteData, $volumesData);
 
-        // Processa os carriers e remove duplicados por chave composta
+        // Processa e insere os carriers únicos
         $carriersData = collect(data_get($freteRapidoResponse, 'dispatchers.0.offers', []))
             ->map(function ($item) use ($quote) {
                 return [
@@ -93,5 +99,4 @@ class QuoteService
 
         return hash('sha256', json_encode($data));
     }
-
 }
