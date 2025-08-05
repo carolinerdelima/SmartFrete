@@ -2,12 +2,16 @@
 
 namespace App\Services;
 
-use App\Http\Clients\FreteRapidoHttpClient;
+use Illuminate\Support\Str;
+
 use App\Models\Quote;
 use App\Repositories\QuoteRepository;
 use App\Repositories\CarrierRepository;
-use Illuminate\Support\Str;
+use App\Http\Clients\FreteRapidoHttpClient;
 
+/**
+ * Service responsável por criar ou recuperar cotações
+ */
 class QuoteService
 {
     public function __construct(
@@ -16,6 +20,14 @@ class QuoteService
         protected CarrierRepository $carrierRepository,
     ) {}
 
+    /**
+     * Cria ou retorna uma cotação existente baseada nos dados enviados.
+     *
+     * @param array $data Dados do payload enviado pelo cliente.
+     * @return Quote Cotação criada ou encontrada com os dados persistidos.
+     *
+     * @throws \RuntimeException Em caso de erro na requisição à Frete Rápido.
+     */
     public function createQuote(array $data): Quote
     {
         $payloadHash = self::calculatePayloadHash($data);
@@ -29,10 +41,10 @@ class QuoteService
         $uuid = Str::uuid()->toString();
 
         // Extrai volumes e cep do primeiro dispatcher
-        $firstDispatcher = $data['dispatchers'][0] ?? null;
-        $volumes = $firstDispatcher['volumes'] ?? [];
-        $originZipcode = $firstDispatcher['zipcode'] ?? null;
-        $recipientZipcode = $data['recipient']['zipcode'];
+        $firstDispatcher   = $data['dispatchers'][0] ?? null;
+        $volumes           = $firstDispatcher['volumes'] ?? [];
+        $originZipcode     = $firstDispatcher['zipcode'] ?? null;
+        $recipientZipcode  = $data['recipient']['zipcode'];
 
         $freteRapidoResponse = $this->client->quote(
             $volumes,
@@ -44,8 +56,8 @@ class QuoteService
             'uuid'                  => $uuid,
             'payload_hash'          => $payloadHash,
             'recipient_zipcode'     => $recipientZipcode,
-            'frete_rapido_request'  => json_encode($data),
-            'frete_rapido_response' => json_encode($freteRapidoResponse),
+            'frete_rapido_request'  => $data,
+            'frete_rapido_response' => $freteRapidoResponse,
             'response_time_ms'      => 0,
         ];
 
@@ -83,6 +95,12 @@ class QuoteService
         return $quote->load('carriers');
     }
 
+    /**
+     * Calcula o hash do payload, ordenando os dados recursivamente.
+     *
+     * @param array $data Payload original
+     * @return string Hash SHA-256 do payload ordenado
+     */
     public static function calculatePayloadHash(array $data): string
     {
         $sortRecursively = function (&$array) use (&$sortRecursively) {
