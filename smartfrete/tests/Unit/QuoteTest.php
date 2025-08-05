@@ -17,13 +17,27 @@ class QuoteTest extends TestCase
     public function cria_quote_com_sucesso(): void
     {
         $quote = Quote::factory()->create([
-            'recipient_zipcode' => '91520-540',
+            'recipient_zipcode' => '91520540',
         ]);
 
         $this->assertDatabaseHas('quotes', [
             'id' => $quote->id,
-            'recipient_zipcode' => '91520-540',
+            'recipient_zipcode' => '91520540',
         ]);
+    }
+
+    #[Test]
+    public function quote_tem_payload_hash(): void
+    {
+        $hash = hash('sha256', 'teste-payload');
+
+        $quote = Quote::factory()->create([
+            'payload_hash' => $hash,
+        ]);
+
+        $this->assertNotNull($quote->payload_hash);
+        $this->assertEquals(64, strlen($quote->payload_hash));
+        $this->assertDatabaseHas('quotes', ['payload_hash' => $hash]);
     }
 
     #[Test]
@@ -75,14 +89,16 @@ class QuoteTest extends TestCase
     #[Test]
     public function quote_pode_ser_criada_em_lote(): void
     {
-        $quotes = Quote::factory()->count(5)->create();
+        Quote::factory()->count(5)->create();
+
         $this->assertCount(5, Quote::all());
     }
 
     #[Test]
     public function quote_tem_zipcode_valido(): void
     {
-        $quote = Quote::factory()->create(['recipient_zipcode' => '12345-678']);
-        $this->assertMatchesRegularExpression('/^\d{5}-\d{3}$/', $quote->recipient_zipcode);
+        $quote = Quote::factory()->create(['recipient_zipcode' => '12345678']);
+
+        $this->assertMatchesRegularExpression('/^\d{8}$/', $quote->recipient_zipcode);
     }
 }

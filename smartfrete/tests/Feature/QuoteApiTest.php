@@ -2,11 +2,12 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\Models\Carrier;
 use App\Models\Quote;
 use App\Models\Volume;
-use App\Models\Carrier;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+use App\Services\QuoteService;
 
 class QuoteApiTest extends TestCase
 {
@@ -17,13 +18,13 @@ class QuoteApiTest extends TestCase
         $response = $this->postJson('/api/quote', []);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors([
-                        'recipient.address.zipcode',
-                        'volumes'
-                 ]);
+            ->assertJsonValidationErrors([
+                'recipient.address.zipcode',
+                'volumes'
+            ]);
     }
 
-    public function test_deve_retornar_200_e_persistir_dados_quando_requisicao_valida(): void
+    public function test_deve_criar_ou_retornar_quote_existente_e_persistir_carriers_volumes(): void
     {
         $payload = [
             'recipient' => [
@@ -46,32 +47,47 @@ class QuoteApiTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson('/api/quote', $payload);
+        $response1 = $this->postJson('/api/quote', $payload);
+        $response1->assertStatus(200)
+            ->assertJsonStructure([
+                'carrier' => [
+                    '*' => [
+                        'name',
+                        'service',
+                        'deadline',
+                        'price'
+                    ]
+                ]
+            ]);
 
-        $response->assertStatus(200)
-                    ->assertJsonStructure([
-                        'carrier' => [
-                            '*' => [
-                                'name',
-                                'service',
-                                'deadline',
-                                'price'
-                            ]
-                        ]
-                 ]);
-
-        // Verifica se uma quote foi salva
+        // Verifica persistência
         $this->assertEquals(1, Quote::count());
-
-        // Verifica se o volume foi salvo e associado
         $this->assertEquals(1, Volume::count());
-        $volume = Volume::first();
-        $this->assertEquals('ABC123', $volume->sku);
-
-        // Verifica se ao menos 1 carrier foi salvo para essa quote
         $this->assertGreaterThanOrEqual(1, Carrier::count());
+
+        $quote = Quote::first();
+        $volume = Volume::first();
+
+        $this->assertEquals('ABC123', $volume->sku);
+        $this->assertEquals('29161376', $quote->recipient_zipcode);
+
         $this->assertDatabaseHas('carriers', [
-            'quote_id' => Quote::first()->id
+            'quote_id' => $quote->id
         ]);
+
+        // Segunda chamada com mesmo payload (deve reutilizar a quote)
+        $response2 = $this->postJson('/api/quote', $payload);
+        $response2->assertStatus(200);
+
+        $this->assertEquals(1, Quote::count(), 'A quote não deve ser duplicada');
+        $this->assertEquals(1, Volume::count(), 'O volume não deve ser duplicado');
+        $this->assertGreaterThanOrEqual(1, Carrier::count(), 'Carriers devem continuar existentes');
+
+        $expectedHash = QuoteService::calculatePayloadHash($payload);
+
+        $this->assertDatabaseHas('quotes', [
+            'payload_hash' => $expectedHash,
+        ]);
+
     }
 }

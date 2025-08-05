@@ -18,7 +18,7 @@ class QuoteService
 
     public function createQuote(array $data): Quote
     {
-        $payloadHash = hash('sha256', json_encode($data));
+        $payloadHash = self::calculatePayloadHash($data);
 
         // Se já existe a cotação, retorna com os carriers carregados
         $quote = Quote::where('payload_hash', $payloadHash)->with('carriers')->first();
@@ -52,7 +52,7 @@ class QuoteService
         // Cria a cotação e os volumes
         $quote = $this->quoteRepository->store($quoteData, $volumesData);
 
-        // Processa os carriers
+        // Processa os carriers e remove duplicados por chave composta
         $carriersData = collect(data_get($freteRapidoResponse, 'dispatchers.0.offers', []))
             ->map(function ($item) use ($quote) {
                 return [
@@ -65,10 +65,33 @@ class QuoteService
                     'carrier_code'   => data_get($item, 'carrier.reference'),
                     'service_code'   => data_get($item, 'service_code'),
                 ];
-            })->toArray();
+            })
+            ->unique(fn ($item) =>
+                $item['quote_id'] . '|' . $item['carrier_code'] . '|' . $item['service_code']
+            )
+            ->values()
+            ->toArray();
 
         $this->carrierRepository->upsertCarriers($carriersData);
 
         return $quote->load('carriers');
     }
+
+    public static function calculatePayloadHash(array $data): string
+    {
+        $sortRecursively = function (&$array) use (&$sortRecursively) {
+            if (!is_array($array)) return;
+            foreach ($array as &$value) {
+                if (is_array($value)) {
+                    $sortRecursively($value);
+                }
+            }
+            ksort($array);
+        };
+
+        $sortRecursively($data);
+
+        return hash('sha256', json_encode($data));
+    }
+
 }
