@@ -8,7 +8,11 @@ use App\Docs\OpenApiSpec;
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Registra quaisquer serviços da aplicação.
+     *
+     * Este método é chamado antes de todos os outros service providers.
+     *
+     * @return void
      */
     public function register(): void
     {
@@ -16,13 +20,18 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * Executa tarefas de inicialização após todos os serviços terem sido registrados.
+     *
+     * Aqui, forcei o autoload da classe de especificação OpenAPI para que
+     * o Swagger consiga reconhecer mesmo que não seja referenciada diretamente.
+     *
+     * @return void
      */
     public function boot(): void
     {
         // Força o carregamento da classe de documentação para o Swagger reconhecê-la
         if (class_exists(OpenApiSpec::class)) {
-            // nada precisa ser feito aqui
+            // Nada precisa ser feito aqui; apenas garantir o autoload.
         }
     }
 }

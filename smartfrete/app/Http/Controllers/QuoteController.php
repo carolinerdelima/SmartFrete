@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\QuoteRequest;
-use App\Services\QuoteService;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Annotations as OA;
+
+use App\Services\QuoteService;
+use App\Http\Requests\QuoteRequest;
 
 class QuoteController extends Controller
 {

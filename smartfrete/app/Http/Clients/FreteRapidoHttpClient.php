@@ -5,13 +5,48 @@ namespace App\Http\Clients;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * Client  responsável por interagir com a API da Frete Rápido.
+ * Este client realiza cotações utilizando os dados fornecidos.
+ */
 class FreteRapidoHttpClient
 {
+    /**
+     * CNPJ do remetente (utilizado como shipper e dispatcher).
+     *
+     * @var string
+     */
     protected string $cnpj;
+
+    /**
+     * Token de autenticação da API Frete Rápido.
+     *
+     * @var string
+     */
     protected string $token;
+
+    /**
+     * URL base da API da Frete Rápido.
+     *
+     * @var string
+     */
     protected string $baseUrl;
+
+    /**
+     * Código da plataforma fornecido pela Frete Rápido.
+     *
+     * @var string
+     */
     protected string $platformCode;
 
+    /**
+     * Construtor do client.
+     *
+     * Lê as credenciais do arquivo de configuração `config/services.php` e valida
+     * se todos os valores obrigatórios estão presentes.
+     *
+     * @throws \InvalidArgumentException Se qualquer credencial estiver ausente.
+     */
     public function __construct()
     {
         $this->baseUrl      = config('services.freterapido.base_url');
@@ -23,12 +58,14 @@ class FreteRapidoHttpClient
             'token'         => $this->token,
             'cnpj'          => $this->cnpj,
             'platform_code' => $this->platformCode,
-            'base_url' => $this->baseUrl,
+            'base_url'      => $this->baseUrl,
         ];
 
         foreach ($credenciais as $chave => $valor) {
             if (empty($valor)) {
-                throw new \InvalidArgumentException("Credencial ausente: '{$chave}' não foi configurado corretamente nas variáveis de ambiente.");
+                throw new \InvalidArgumentException(
+                    "Credencial ausente: '{$chave}' não foi configurado corretamente nas variáveis de ambiente."
+                );
             }
         }
     }
@@ -36,23 +73,24 @@ class FreteRapidoHttpClient
     /**
      * Realiza a simulação de cotação com a Frete Rápido.
      *
-     * @param array $volumes     Volumes no formato da API da Frete Rápido
-     * @param string $zipcode    CEP do destinatário
-     * @param array $simulationType Tipos de simulação desejados. Ex: [0] (fracionada), [1] (lotação)
-     * @return array
-     * @throws \RuntimeException
+     * @param array $volumes         Volumes no formato da API da Frete Rápido.
+     * @param string $zipcode        CEP do destinatário.
+     * @param array $simulationType  Tipos de simulação desejados. Ex: [0] (fracionada), [1] (lotação).
+     *
+     * @return array Retorno da simulação da Frete Rápido.
+     *
+     * @throws \RuntimeException Em caso de falha na requisição ou na resposta da API.
      */
     public function quote(array $volumes, string $zipcode, array $simulationType = [0]): array
     {
         $payload = $this->buildPayload($volumes, $zipcode, $simulationType);
 
         try {
-            $response = Http::timeout(10)              // tempo máximo de 10 segundos
-                            ->retry(3, 200)            // 3 tentativas, com 200ms entre elas
+            $response = Http::timeout(10)
+                            ->retry(3, 200)
                             ->post("{$this->baseUrl}/quote/simulate", $payload);
 
             if ($response->failed()) {
-                // Loga erro com o body pra debugar
                 Log::error('Erro na consulta Frete Rápido', [
                     'status' => $response->status(),
                     'body' => $response->body(),
@@ -65,7 +103,6 @@ class FreteRapidoHttpClient
             }
 
             return $response->json();
-
         } catch (\Throwable $e) {
             throw new \RuntimeException("Erro ao consultar Frete Rápido: " . $e->getMessage(), 500);
         }
@@ -73,6 +110,12 @@ class FreteRapidoHttpClient
 
     /**
      * Prepara o payload conforme a especificação da API Frete Rápido.
+     *
+     * @param array $volumes         Volumes para envio.
+     * @param string $zipcode        CEP do destinatário.
+     * @param array $simulationType  Tipos de simulação desejados.
+     *
+     * @return array Payload formatado para a requisição.
      */
     protected function buildPayload(array $volumes, string $zipcode, array $simulationType): array
     {

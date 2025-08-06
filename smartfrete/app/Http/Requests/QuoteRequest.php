@@ -6,13 +6,29 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
+/**
+ * Classe responsável pela validação da requisição de cotação (quote).
+ * 
+ * Valida os dados necessários para realizar uma simulação de frete
+ * com a API da Frete Rápido.
+ */
 class QuoteRequest extends FormRequest
 {
+    /**
+     * Determina se o usuário está autorizado a fazer esta requisição.
+     *
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Regras de validação aplicadas à requisição.
+     *
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [
@@ -35,6 +51,11 @@ class QuoteRequest extends FormRequest
         ];
     }
 
+    /**
+     * Mensagens personalizadas para erros de validação.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
@@ -84,6 +105,12 @@ class QuoteRequest extends FormRequest
         ];
     }
 
+    /**
+     * Manipula falhas de validação lançando uma exceção HTTP com os erros.
+     *
+     * @param Validator $validator
+     * @throws HttpResponseException
+     */
     protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(response()->json([
