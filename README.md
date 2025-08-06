@@ -83,6 +83,13 @@ chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 ```
 
+
+### 8. Rode as migrations
+
+```bash
+docker compose exec app bash
+php artisan migrate
+```
 ---
 
 ## ✅ Acesso
