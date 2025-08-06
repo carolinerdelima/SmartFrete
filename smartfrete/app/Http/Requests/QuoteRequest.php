@@ -16,7 +16,7 @@ class QuoteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'recipient.zipcode' => 'required|string|size:8',
+            'recipient.zipcode' => ['required', 'digits:8'],
 
             'dispatchers' => 'required|array|min:1',
             'dispatchers.*.volumes' => 'required|array|min:1',
@@ -39,8 +39,7 @@ class QuoteRequest extends FormRequest
     {
         return [
             'recipient.zipcode.required' => 'O campo CEP é obrigatório.',
-            'recipient.zipcode.string' => 'O CEP deve ser uma string.',
-            'recipient.zipcode.size' => 'O CEP deve conter exatamente 8 caracteres.',
+            'recipient.zipcode.digits' => 'O CEP deve conter exatamente 8 dígitos numéricos.',
 
             'dispatchers.required' => 'Pelo menos um expedidor deve ser informado.',
             'dispatchers.array' => 'O campo dispatchers deve ser um array.',
